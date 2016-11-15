@@ -23,6 +23,10 @@ or concerns with licensing, please contact techsupport@sparkfun.com.
 
 Distributed as-is; no warranty is given.
 ******************************************************************************/
+//Use VERBOSE_SERIAL to add debug serial to an existing Serial object.
+//Note:  Use of VERBOSE_SERIAL adds delays surround RW ops, and should not be used
+//for functional testing.
+//#define VERBOSE_SERIAL
 
 //See SparkFunLIS3DH.h for additional topology notes.
 
@@ -347,28 +351,22 @@ LIS3DH::LIS3DH( uint8_t busType, uint8_t inputArg ) : LIS3DHCore( busType, input
 {
 	//Construct with these default settings
 	//ADC stuff
-	settings.adcEnabled = 0;
+	settings.adcEnabled = 1;
 	
 	//Temperature settings
-	settings.tempEnabled = 0;
+	settings.tempEnabled = 1;
 
 	//Accelerometer settings
-	settings.accelSampleRate = 400;  //Hz.  Can be: 0,1,10,25,50,100,200,400,1600,5000 Hz
-	settings.accelRange = 16;      //Max G force readable.  Can be: 2, 4, 8, 16
+	settings.accelSampleRate = 50;  //Hz.  Can be: 0,1,10,25,50,100,200,400,1600,5000 Hz
+	settings.accelRange = 2;      //Max G force readable.  Can be: 2, 4, 8, 16
 
 	settings.xAccelEnabled = 1;
 	settings.yAccelEnabled = 1;
 	settings.zAccelEnabled = 1;
 
-	
 //	settings.accelFilter = 100;  //Hz.  Can be: 50, 100, 200, 400;
 //	settings.accelFifoEnabled = 1;  //Set to include accelerometer in the FIFO
 //	settings.accelFifoDecimation = 1;  //set 1 for on /1
-//
-//	settings.tempEnabled = 1;
-//
-//	//Select interface mode
-//	settings.commMode = 1;  //Can be modes 1, 2 or 3
 //
 //	//FIFO control data
 //	settings.fifoThreshold = 3000;  //Can be 0 to 4096 (16 bit bytes)
@@ -382,6 +380,23 @@ LIS3DH::LIS3DH( uint8_t busType, uint8_t inputArg ) : LIS3DHCore( busType, input
 
 //****************************************************************************//
 //
+//  Begin
+//
+//  This starts the lower level begin, then applies settings
+//
+//****************************************************************************//
+status_t LIS3DH::begin( void )
+{
+	//Begin the inherited core.  This gets the physical wires connected
+	status_t returnError = beginCore();
+
+	applySettings();
+	
+	return returnError;
+}
+
+//****************************************************************************//
+//
 //  Configuration section
 //
 //  This uses the stored SensorSettings to start the IMU
@@ -389,174 +404,87 @@ LIS3DH::LIS3DH( uint8_t busType, uint8_t inputArg ) : LIS3DHCore( busType, input
 //  "myIMU.settings.accelEnabled = 1;" to configure before calling .begin();
 //
 //****************************************************************************//
-status_t LIS3DH::begin()
+void LIS3DH::applySettings( void )
 {
-	//Check the settings structure values to determine how to setup the device
 	uint8_t dataToWrite = 0;  //Temporary variable
 
-	//Begin the inherited core.  This gets the physical wires connected
-	status_t returnError = beginCore();
+	//Build TEMP_CFG_REG
+	dataToWrite = 0; //Start Fresh!
+	dataToWrite = ((settings.tempEnabled & 0x01) << 6) | ((settings.adcEnabled & 0x01) << 7);
+	//Now, write the patched together data
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_TEMP_CFG_REG: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_TEMP_CFG_REG, dataToWrite);
+	
+	//Build CTRL_REG1
+	dataToWrite = 0; //Start Fresh!
+	//  Convert ODR
+	switch(settings.accelSampleRate)
+	{
+		case 1:
+		dataToWrite |= (0x01 << 4);
+		break;
+		case 10:
+		dataToWrite |= (0x02 << 4);
+		break;
+		case 25:
+		dataToWrite |= (0x03 << 4);
+		break;
+		case 50:
+		dataToWrite |= (0x04 << 4);
+		break;
+		case 100:
+		dataToWrite |= (0x05 << 4);
+		break;
+		case 200:
+		dataToWrite |= (0x06 << 4);
+		break;
+		default:
+		case 400:
+		dataToWrite |= (0x07 << 4);
+		break;
+	}
+	dataToWrite |= (settings.zAccelEnabled & 0x01) << 2;
+	dataToWrite |= (settings.yAccelEnabled & 0x01) << 1;
+	dataToWrite |= (settings.xAccelEnabled & 0x01);
+	//Now, write the patched together data
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_CTRL_REG1: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_CTRL_REG1, dataToWrite);
 
-//	//Setup the accelerometer******************************
-//	dataToWrite = 0; //Start Fresh!
-//	if ( settings.accelEnabled == 1) {
-//		//Build config reg
-//		//First patch in filter bandwidth
-//		switch (settings.accelBandWidth) {
-//		case 50:
-//			dataToWrite |= LIS3DH_ACC_GYRO_BW_XL_50Hz;
-//			break;
-//		case 100:
-//			dataToWrite |= LIS3DH_ACC_GYRO_BW_XL_100Hz;
-//			break;
-//		case 200:
-//			dataToWrite |= LIS3DH_ACC_GYRO_BW_XL_200Hz;
-//			break;
-//		default:  //set default case to max passthrough
-//		case 400:
-//			dataToWrite |= LIS3DH_ACC_GYRO_BW_XL_400Hz;
-//			break;
-//		}
-//		//Next, patch in full scale
-//		switch (settings.accelRange) {
-//		case 2:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_XL_2g;
-//			break;
-//		case 4:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_XL_4g;
-//			break;
-//		case 8:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_XL_8g;
-//			break;
-//		default:  //set default case to 16(max)
-//		case 16:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_XL_16g;
-//			break;
-//		}
-//		//Lastly, patch in accelerometer ODR
-//		switch (settings.accelSampleRate) {
-//		case 13:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_13Hz;
-//			break;
-//		case 26:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_26Hz;
-//			break;
-//		case 52:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_52Hz;
-//			break;
-//		default:  //Set default to 104
-//		case 104:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_104Hz;
-//			break;
-//		case 208:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_208Hz;
-//			break;
-//		case 416:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_416Hz;
-//			break;
-//		case 833:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_833Hz;
-//			break;
-//		case 1660:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_1660Hz;
-//			break;
-//		case 3330:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_3330Hz;
-//			break;
-//		case 6660:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_6660Hz;
-//			break;
-//		case 13330:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_XL_13330Hz;
-//			break;
-//		}
-//	}
-//	else
-//	{
-//		//dataToWrite already = 0 (powerdown);
-//	}
-//
-//	//Now, write the patched together data
-//	writeRegister(LIS3DH_ACC_GYRO_CTRL1_XL, dataToWrite);
-//
-//	//Set the ODR bit
-//	readRegister(&dataToWrite, LIS3DH_ACC_GYRO_CTRL4_C);
-//	dataToWrite &= ~((uint8_t)LIS3DH_ACC_GYRO_BW_SCAL_ODR_ENABLED);
-//	if ( settings.accelODROff == 1) {
-//		dataToWrite |= LIS3DH_ACC_GYRO_BW_SCAL_ODR_ENABLED;
-//	}
-//	writeRegister(LIS3DH_ACC_GYRO_CTRL4_C, dataToWrite);
-//
-//	//Setup the gyroscope**********************************************
-//	dataToWrite = 0; //Start Fresh!
-//	if ( settings.gyroEnabled == 1) {
-//		//Build config reg
-//		//First, patch in full scale
-//		switch (settings.gyroRange) {
-//		case 125:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_125_ENABLED;
-//			break;
-//		case 245:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_G_245dps;
-//			break;
-//		case 500:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_G_500dps;
-//			break;
-//		case 1000:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_G_1000dps;
-//			break;
-//		default:  //Default to full 2000DPS range
-//		case 2000:
-//			dataToWrite |= LIS3DH_ACC_GYRO_FS_G_2000dps;
-//			break;
-//		}
-//		//Lastly, patch in gyro ODR
-//		switch (settings.gyroSampleRate) {
-//		case 13:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_13Hz;
-//			break;
-//		case 26:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_26Hz;
-//			break;
-//		case 52:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_52Hz;
-//			break;
-//		default:  //Set default to 104
-//		case 104:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_104Hz;
-//			break;
-//		case 208:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_208Hz;
-//			break;
-//		case 416:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_416Hz;
-//			break;
-//		case 833:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_833Hz;
-//			break;
-//		case 1660:
-//			dataToWrite |= LIS3DH_ACC_GYRO_ODR_G_1660Hz;
-//			break;
-//		}
-//	}
-//	else
-//	{
-//		//dataToWrite already = 0 (powerdown);
-//	}
-//	//Write the byte
-//	writeRegister(LIS3DH_ACC_GYRO_CTRL2_G, dataToWrite);
-//
-//	//Setup the internal temperature sensor
-//	if ( settings.tempEnabled == 1) {
-//	}
-//
-//	//Return WHO AM I reg  //Not no mo!
-//	uint8_t result;
-//	readRegister(&result, LIS3DH_ACC_GYRO_WHO_AM_I_REG);
-//
-	return returnError;
+	//Build CTRL_REG4
+	dataToWrite = 0; //Start Fresh!
+	//  Convert scaling
+	switch(settings.accelRange)
+	{
+		case 2:
+		dataToWrite |= (0x00 << 4);
+		break;
+		case 4:
+		dataToWrite |= (0x01 << 4);
+		break;
+		case 8:
+		dataToWrite |= (0x02 << 4);
+		break;
+		default:
+		case 16:
+		dataToWrite |= (0x03 << 4);
+		break;
+	}
+	dataToWrite |= 0x80; //set block update
+	dataToWrite |= 0x08; //set high resolution
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_CTRL_REG4: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	//Now, write the patched together data
+	writeRegister(LIS3DH_CTRL_REG4, dataToWrite);
+
 }
-
 //****************************************************************************//
 //
 //  Accelerometer section
@@ -564,8 +492,8 @@ status_t LIS3DH::begin()
 //****************************************************************************//
 int16_t LIS3DH::readRawAccelX( void )
 {
-//	int16_t output;
-//	status_t errorLevel = readRegisterInt16( &output, LIS3DH_ACC_GYRO_OUTX_L_XL );
+	int16_t output;
+	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_X_L );
 //	if( errorLevel != IMU_SUCCESS )
 //	{
 //		if( errorLevel == IMU_ALL_ONES_WARNING )
@@ -577,20 +505,18 @@ int16_t LIS3DH::readRawAccelX( void )
 //			nonSuccessCounter++;
 //		}
 //	}
-//	return output;
-	return 0;
+	return output;
 }
 float LIS3DH::readFloatAccelX( void )
 {
-//	float output = calcAccel(readRawAccelX());
-//	return output;
-	return 0;
+	float output = calcAccel(readRawAccelX());
+	return output;
 }
 
 int16_t LIS3DH::readRawAccelY( void )
 {
-//	int16_t output;
-//	status_t errorLevel = readRegisterInt16( &output, LIS3DH_ACC_GYRO_OUTY_L_XL );
+	int16_t output;
+	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_Y_L );
 //	if( errorLevel != IMU_SUCCESS )
 //	{
 //		if( errorLevel == IMU_ALL_ONES_WARNING )
@@ -602,20 +528,19 @@ int16_t LIS3DH::readRawAccelY( void )
 //			nonSuccessCounter++;
 //		}
 //	}
-//	return output;
-	return 0;
+	return output;
 }
+
 float LIS3DH::readFloatAccelY( void )
 {
-//	float output = calcAccel(readRawAccelY());
-//	return output;
-	return 0;
+	float output = calcAccel(readRawAccelY());
+	return output;
 }
 
 int16_t LIS3DH::readRawAccelZ( void )
 {
-//	int16_t output;
-//	status_t errorLevel = readRegisterInt16( &output, LIS3DH_ACC_GYRO_OUTZ_L_XL );
+	int16_t output;
+	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_Z_L );
 //	if( errorLevel != IMU_SUCCESS )
 //	{
 //		if( errorLevel == IMU_ALL_ONES_WARNING )
@@ -627,153 +552,140 @@ int16_t LIS3DH::readRawAccelZ( void )
 //			nonSuccessCounter++;
 //		}
 //	}
-//	return output;
-	return 0;
+	return output;
 
 }
 
 float LIS3DH::readFloatAccelZ( void )
 {
-//	float output = calcAccel(readRawAccelZ());
-//	return output;
-	return 0;
+	float output = calcAccel(readRawAccelZ());
+	return output;
 }
 
 float LIS3DH::calcAccel( int16_t input )
 {
-//	float output = (float)input * 0.061 * (settings.accelRange >> 1) / 1000;
-//	return output;
-	return 0;
+	float output;
+	switch(settings.accelRange)
+	{
+		case 2:
+		output = (float)input / 15987;
+		break;
+		case 4:
+		output = (float)input / 7840;
+		break;
+		case 8:
+		output = (float)input / 3883;
+		break;
+		case 16:
+		output = (float)input / 1280;
+		break;
+		default:
+		output = 0;
+		break;
+	}
+	return output;
 }
 
 //****************************************************************************//
 //
-//  Temperature section
+//  Accelerometer section
 //
 //****************************************************************************//
-int16_t LIS3DH::readRawTemp( void )
+uint16_t LIS3DH::read10bitADC1( void )
 {
-//	int16_t output;
-//	readRegisterInt16( &output, LIS3DH_ACC_GYRO_OUT_TEMP_L );
-//	return output;
-	return 0;
-}  
-
-float LIS3DH::readTempC( void )
-{
-//	float output = (float)readRawTemp() / 16; //divide by 16 to scale
-//	output += 25; //Add 25 degrees to remove offset
-//
-//	return output;
-	return 0;
-
+	int16_t intTemp;
+	uint16_t uintTemp;
+	readRegisterInt16( &intTemp, LIS3DH_OUT_ADC1_L );
+	intTemp = 0 - intTemp;
+	uintTemp = intTemp + 32768;
+	return uintTemp >> 6;
 }
 
-float LIS3DH::readTempF( void )
+uint16_t LIS3DH::read10bitADC2( void )
 {
-//	float output = (float)readRawTemp() / 16; //divide by 16 to scale
-//	output += 25; //Add 25 degrees to remove offset
-//	output = (output * 9) / 5 + 32;
-//
-//	return output;
-	return 0;
-
+	int16_t intTemp;
+	uint16_t uintTemp;
+	readRegisterInt16( &intTemp, LIS3DH_OUT_ADC2_L );
+	intTemp = 0 - intTemp;
+	uintTemp = intTemp + 32768;
+	return uintTemp >> 6;
 }
 
-////****************************************************************************//
-////
-////  FIFO section
-////
-////****************************************************************************//
-//void LIS3DH::fifoBegin( void ) {
-//	//CONFIGURE THE VARIOUS FIFO SETTINGS
-//	//
-//	//
-//	//This section first builds a bunch of config words, then goes through
-//	//and writes them all.
+uint16_t LIS3DH::read10bitADC3( void )
+{
+	int16_t intTemp;
+	uint16_t uintTemp;
+	readRegisterInt16( &intTemp, LIS3DH_OUT_ADC3_L );
+	intTemp = 0 - intTemp;
+	uintTemp = intTemp + 32768;
+	return uintTemp >> 6;
+}
+
+//****************************************************************************//
 //
-//	//Split and mask the threshold
-//	uint8_t thresholdLByte = settings.fifoThreshold & 0x00FF;
-//	uint8_t thresholdHByte = (settings.fifoThreshold & 0x0F00) >> 8;
-//	//Pedo bits not configured (ctl2)
+//  FIFO section
 //
-//	//CONFIGURE FIFO_CTRL3
-//	uint8_t tempFIFO_CTRL3 = 0;
-//	if (settings.gyroFifoEnabled == 1)
-//	{
-//		//Set up gyro stuff
-//		//Build on FIFO_CTRL3
-//		//Set decimation
-//		tempFIFO_CTRL3 |= (settings.gyroFifoDecimation & 0x07) << 3;
-//
-//	}
-//	if (settings.accelFifoEnabled == 1)
-//	{
-//		//Set up accelerometer stuff
-//		//Build on FIFO_CTRL3
-//		//Set decimation
-//		tempFIFO_CTRL3 |= (settings.accelFifoDecimation & 0x07);
-//	}
-//
-//	//CONFIGURE FIFO_CTRL4  (nothing for now-- sets data sets 3 and 4
-//	uint8_t tempFIFO_CTRL4 = 0;
-//
-//
-//	//CONFIGURE FIFO_CTRL5
-//	uint8_t tempFIFO_CTRL5 = 0;
-//	switch (settings.fifoSampleRate) {
-//	default:  //set default case to 10Hz(slowest)
-//	case 10:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_10Hz;
-//		break;
-//	case 25:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_25Hz;
-//		break;
-//	case 50:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_50Hz;
-//		break;
-//	case 100:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_100Hz;
-//		break;
-//	case 200:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_200Hz;
-//		break;
-//	case 400:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_400Hz;
-//		break;
-//	case 800:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_800Hz;
-//		break;
-//	case 1600:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_1600Hz;
-//		break;
-//	case 3300:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_3300Hz;
-//		break;
-//	case 6600:
-//		tempFIFO_CTRL5 |= LIS3DH_ACC_GYRO_ODR_FIFO_6600Hz;
-//		break;
-//	}
-//	//Hard code the fifo mode here:
-//	tempFIFO_CTRL5 |= settings.fifoModeWord = 6;  //set mode:
-//
-//	//Write the data
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_CTRL1, thresholdLByte);
-//	//Serial.println(thresholdLByte, HEX);
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_CTRL2, thresholdHByte);
-//	//Serial.println(thresholdHByte, HEX);
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_CTRL3, tempFIFO_CTRL3);
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_CTRL4, tempFIFO_CTRL4);
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_CTRL5, tempFIFO_CTRL5);
-//
-//}
-//void LIS3DH::fifoClear( void ) {
-//	//Drain the fifo data and dump it
-//	while( (fifoGetStatus() & 0x1000 ) == 0 ) {
-//		fifoRead();
-//	}
-//
-//}
+//****************************************************************************//
+void LIS3DH::fifoBegin( void )
+{
+	uint8_t dataToWrite = 0;  //Temporary variable
+
+	//Build LIS3DH_FIFO_CTRL_REG
+	readRegister( &dataToWrite, LIS3DH_FIFO_CTRL_REG ); //Start with existing data
+	dataToWrite &= 0x20;//clear all but bit 5
+	dataToWrite |= (settings.fifoMode & 0x03) << 6; //apply mode
+	dataToWrite |= (settings.fifoThreshold & 0x1F); //apply threshold
+	//Now, write the patched together data
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_FIFO_CTRL_REG: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_FIFO_CTRL_REG, dataToWrite);
+
+	//Build CTRL_REG5
+	readRegister( &dataToWrite, LIS3DH_CTRL_REG5 ); //Start with existing data
+	dataToWrite &= 0xBF;//clear bit 6
+	dataToWrite |= (settings.fifoEnabled & 0x01) << 6;
+	//Now, write the patched together data
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_CTRL_REG5: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_CTRL_REG5, dataToWrite);
+}
+
+void LIS3DH::fifoClear( void ) {
+	//Drain the fifo data and dump it
+	while( (fifoGetStatus() & 0x20 ) == 0 ) {
+		readRawAccelX();
+		readRawAccelY();
+		readRawAccelZ();
+	}
+}
+
+void LIS3DH::fifoStartRec( void )
+{
+	uint8_t dataToWrite = 0;  //Temporary variable
+	
+	//Turn off...
+	readRegister( &dataToWrite, LIS3DH_FIFO_CTRL_REG ); //Start with existing data
+	dataToWrite &= 0x3F;//clear mode
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_FIFO_CTRL_REG: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_FIFO_CTRL_REG, dataToWrite);	
+	//  ... then back on again
+	readRegister( &dataToWrite, LIS3DH_FIFO_CTRL_REG ); //Start with existing data
+	dataToWrite &= 0x3F;//clear mode
+	dataToWrite |= (settings.fifoMode & 0x03) << 6; //apply mode
+	//Now, write the patched together data
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_FIFO_CTRL_REG: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_FIFO_CTRL_REG, dataToWrite);
+}
 //int16_t LIS3DH::fifoRead( void ) {
 //	//Pull the last data from the fifo
 //	uint8_t tempReadByte = 0;
@@ -786,18 +698,17 @@ float LIS3DH::readTempF( void )
 //	return tempAccumulator;
 //}
 //
-//uint16_t LIS3DH::fifoGetStatus( void ) {
-//	//Return some data on the state of the fifo
-//	uint8_t tempReadByte = 0;
-//	uint16_t tempAccumulator = 0;
-//	readRegister(&tempReadByte, LIS3DH_ACC_GYRO_FIFO_STATUS1);
-//	tempAccumulator = tempReadByte;
-//	readRegister(&tempReadByte, LIS3DH_ACC_GYRO_FIFO_STATUS2);
-//	tempAccumulator |= (tempReadByte << 8);
-//
-//	return tempAccumulator;  
-//
-//}
+uint8_t LIS3DH::fifoGetStatus( void )
+{
+	//Return some data on the state of the fifo
+	uint8_t tempReadByte = 0;
+	readRegister(&tempReadByte, LIS3DH_FIFO_SRC_REG);
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_FIFO_SRC_REG: 0x");
+	Serial.println(tempReadByte, HEX);
+#endif
+	return tempReadByte;  
+}
 //void LIS3DH::fifoEnd( void ) {
 //	// turn off the fifo
 //	writeRegister(LIS3DH_ACC_GYRO_FIFO_STATUS1, 0x00);  //Disable

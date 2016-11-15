@@ -29,6 +29,7 @@ Distributed as-is; no warranty is given.
 
 #include "stdint.h"
 
+//values for commInterface
 #define I2C_MODE 0
 #define SPI_MODE 1
 
@@ -74,23 +75,19 @@ public:
 	//Writes an 8-bit byte;
 	status_t writeRegister(uint8_t, uint8_t);
 	
-	
 private:
-	
 	//Communication stuff
 	uint8_t commInterface;
 	uint8_t I2CAddress;
 	uint8_t chipSelectPin;
-
 };
 
 //This struct holds the settings the driver uses to do calculations
-struct SensorSettings {
+struct SensorSettings
+{
 public:
-
+	//ADC and Temperature settings
 	uint8_t adcEnabled;
-	
-	//Temperature settings
 	uint8_t tempEnabled;
 
 	//Accelerometer settings
@@ -101,31 +98,10 @@ public:
 	uint8_t yAccelEnabled;
 	uint8_t zAccelEnabled;
 	
-	////ADC stuff
-	//uint8_t adcEnabled;
-	//
-	////Temperature settings
-	//uint8_t tempEnabled;
-    //
-	////Accelerometer settings
-	//uint8_t accelEnabled;
-	//uint16_t accelSampleRate;
-	//uint8_t accelODROff;
-	//uint16_t accelRange;
-	//uint16_t accelBandWidth;
-	//
-	//uint8_t accelFifoEnabled;
-	//uint8_t accelFifoDecimation;
-	//
-	//
-	////Non-basic mode settings
-	//uint8_t commMode;
-	//
-	////FIFO control data
-	//uint16_t fifoThreshold;
-	//int16_t fifoSampleRate;
-	//uint8_t fifoModeWord;
-	
+	//Fifo settings
+	uint8_t fifoEnabled;
+	uint8_t fifoMode; //can be 0x0,0x1,0x2,0x3
+	uint8_t fifoThreshold;
 };
 
 
@@ -148,10 +124,11 @@ public:
 	//Constructor generates default SensorSettings.
 	//(over-ride after construction if desired)
 	LIS3DH( uint8_t busType = I2C_MODE, uint8_t inputArg = 0x19 );
-	~LIS3DH() = default;
+	//~LIS3DH() = default;
 	
 	//Call to apply SensorSettings
-	status_t begin(void);
+	status_t begin( void );
+	void applySettings( void );
 
 	//Returns the raw bits from the sensor cast as 16-bit signed integers
 	int16_t readRawAccelX( void );
@@ -163,29 +140,30 @@ public:
 	float readFloatAccelY( void );
 	float readFloatAccelZ( void );
 
-	//Temperature related methods
+	//ADC related calls
+	uint16_t read10bitADC1( void );
+	uint16_t read10bitADC2( void );
+	uint16_t read10bitADC3( void );
+	
+	//Temperature
 	int16_t readRawTemp( void );
 	float readTempC( void );
 	float readTempF( void );
 
 	//FIFO stuff
-	//void fifoBegin( void );
-	//void fifoClear( void );
+	void fifoBegin( void );
+	void fifoClear( void );
 	//int16_t fifoRead( void );
-	//uint16_t fifoGetStatus( void );
+	uint8_t fifoGetStatus( void );
+	void fifoStartRec();
 	//void fifoEnd( void );
-	//
+	
 	//float calcGyro( int16_t );
 	float calcAccel( int16_t );
 	
 private:
 
 };
-
-
-
-
-
 
 //Device Registers
 #define LIS3DH_STATUS_REG_AUX         0x07
@@ -226,18 +204,5 @@ private:
 #define LIS3DH_TIME_LIMIT             0x3B
 #define LIS3DH_TIME_LATENCY           0x3C
 #define LIS3DH_TIME_WINDOW            0x3D
-
-//Example enum:
-
-//typedef enum {
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DATA_NOT_IN_FIFO 		 = 0x00,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_NO_DECIMATION 		 = 0x01,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_2 		 = 0x02,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_3 		 = 0x03,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_4 		 = 0x04,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_8 		 = 0x05,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_16 		 = 0x06,
-//	LIS3DH_ACC_GYRO_DEC_FIFO_XL_DECIMATION_BY_32 		 = 0x07,
-//} LIS3DH_ACC_GYRO_DEC_FIFO_XL_t;
 
 #endif  // End of __LIS3DH_IMU_H__ definition check

@@ -38,13 +38,21 @@ Distributed as-is; no warranty is given.
 #include "Wire.h"
 #include "SPI.h"
 
-LIS3DH myIMU; //Default constructor is I2C, addr 0x19.
+LIS3DH myIMU(I2C_MODE, 0x19); //Default constructor is I2C, addr 0x19.
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   delay(1000); //relax...
   Serial.println("Processor came out of reset.\n");
+  
+  myIMU.settings.adcEnabled = 1;
+  myIMU.settings.tempEnabled = 1;
+  myIMU.settings.accelSampleRate = 50;  //Hz.  Can be: 0,1,10,25,50,100,200,400,1600,5000 Hz
+  myIMU.settings.accelRange = 16;      //Max G force readable.  Can be: 2, 4, 8, 16
+  myIMU.settings.xAccelEnabled = 1;
+  myIMU.settings.yAccelEnabled = 1;
+  myIMU.settings.zAccelEnabled = 1;
   
   //Call .begin() to configure the IMU
   myIMU.begin();
@@ -63,5 +71,19 @@ void loop()
   Serial.print(" Z = ");
   Serial.println(myIMU.readFloatAccelZ(), 4);
 
+  Serial.print("\nThermometer:\n");
+  Serial.print(" Degrees C = ");
+  Serial.println(myIMU.readTempC(), 4);
+  Serial.print(" Degrees F = ");
+  Serial.println(myIMU.readTempF(), 4);
+  
+//  float temp = 0;
+//  for(int i =0; i < 50; i++)
+//  {
+//	temp += myIMU.readRawAccelZ();
+//	delay(100);
+//  }
+//  Serial.println(temp / 50);
+  
   delay(1000);
 }

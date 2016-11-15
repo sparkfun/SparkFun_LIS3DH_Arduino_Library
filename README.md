@@ -21,15 +21,14 @@ Repository Contents
 Example Briefs
 --------------
 
-* **BROKEN** FifoExample - Demonstrates using the built-in buffer to burst-collect data - **Good demonstration of settings**
-* **BROKEN** InterruptFreeFall - Embedded function demonstrating free-fall detection
-* **BROKEN** InterruptHWTapConfig - Embedded function demonstrating tap and double-tap detection
+* ADCUsage - Demonstrates analog in reads and has notes about temperature collection
+* FifoExample - Demonstrates using the built-in buffer to burst-collect data - **Good demonstration of settings**
+* FullSettingExample - Shows all settings, with non-used options commented out
+* IntUsage - shows configuration of interrupt bits
 * LowLevelExample - Demonstrates using only the core driver without math and settings overhead
-* **BROKEN** MemoryPagingExample - Demonstrates switching between memory pages
-* **BROKEN** MinimalistExample - The **easiest** configuration
+* MinimalistExample - The **easiest** configuration
 * **BROKEN** MultiI2C - Using two LIS3DHs over I2C
 * **BROKEN** MultiSPI - Using two LIS3DHs over SPI
-* **BROKEN** Pedometer - Embedded function demonstrating step-counting feature
 
 Documentation
 --------------

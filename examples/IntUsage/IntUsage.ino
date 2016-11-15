@@ -38,7 +38,7 @@ Distributed as-is; no warranty is given.
 #include "Wire.h"
 #include "SPI.h"
 
-LIS3DH myIMU; //Default constructor is I2C, addr 0x19.
+LIS3DH myIMU(I2C_MODE, 0x19); //Default constructor is I2C, addr 0x19.
 
 void setup() {
   // put your setup code here, to run once:
@@ -46,8 +46,35 @@ void setup() {
   delay(1000); //relax...
   Serial.println("Processor came out of reset.\n");
   
+  myIMU.settings.adcEnabled = 0;
+  myIMU.settings.tempEnabled = 0;
+  myIMU.settings.accelSampleRate = 50;  //Hz.  Can be: 0,1,10,25,50,100,200,400,1600,5000 Hz
+  myIMU.settings.accelRange = 16;      //Max G force readable.  Can be: 2, 4, 8, 16
+  myIMU.settings.xAccelEnabled = 1;
+  myIMU.settings.yAccelEnabled = 1;
+  myIMU.settings.zAccelEnabled = 1;
+  
   //Call .begin() to configure the IMU
   myIMU.begin();
+  
+  uint8_t dataToWrite;  //Temporary variable
+  
+  //Configure interrupts for pin 1
+  dataToWrite = 0;
+  dataToWrite |= 0x80; //Click
+  //dataToWrite |= 0x10; //Data ready
+  //dataToWrite |= 0x04; //FIFO watermark
+  //dataToWrite |= 0x02; //FIFO overrun
+  dataToWrite |= 0x40; //enable outputs on pin 1
+  myIMU.writeRegister(LIS3DH_CTRL_REG3, dataToWrite);
+  
+  //Configure interrupts for pin 2
+  dataToWrite = 0;
+  dataToWrite |= 0x80; //Click
+  dataToWrite |= 0x10; //boot status
+  //dataToWrite |= 0x02; //invert pin 2 output logic
+  dataToWrite |= 0x40; //enable outputs on pin 2
+  myIMU.writeRegister(LIS3DH_CTRL_REG6, dataToWrite);
 
 }
 

@@ -44,8 +44,8 @@ Distributed as-is; no warranty is given.
 
 uint16_t errorsAndWarnings = 0;
 
-//LIS3DHCore myIMU( I2C_MODE, 0x19 );
-LIS3DHCore myIMU( SPI_MODE, 10 );
+LIS3DHCore myIMU( I2C_MODE, 0x19 );
+//LIS3DHCore myIMU( SPI_MODE, 10 );
 
 void setup() {
   // put your setup code here, to run once:
