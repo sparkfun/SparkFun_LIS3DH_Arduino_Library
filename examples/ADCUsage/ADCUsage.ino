@@ -1,16 +1,22 @@
 /******************************************************************************
-MinimalistExample.ino
+ADCUsage.ino
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DS3_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DS3_Arduino_Library
+Nov 16, 2016
+https://github.com/sparkfun/LIS3DH_Breakout
+https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
 Description:
-Most basic example of use.
+ADC pin reading.
 
-Example using the LSM6DS3 with basic settings.  This sketch collects Gyro and
-Accelerometer data every second, then presents it on the serial monitor.
+This returns 10 bit values for the 3 analog in pins.  The ADC works a little different
+than the arduino, in that the detectable range is centered around half-rail voltage and
+is not rail to rail.  Connect a potentiometer between 3.3v and ground, and with the
+wiper connected to a pin.
+
+Also shown in this sketch is how the temperature is handled in the LIS3DH.
+When temperature is enabled, ADC3 can be read to determine the temperature change
+only, with a LSb worth 1 degree celsius.
 
 Resources:
 Uses Wire.h for i2c operation

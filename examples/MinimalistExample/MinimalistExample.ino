@@ -2,14 +2,14 @@
 MinimalistExample.ino
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DS3_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DS3_Arduino_Library
+Nov 16, 2016
+https://github.com/sparkfun/LIS3DH_Breakout
+https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
 Description:
 Most basic example of use.
 
-Example using the LSM6DS3 with basic settings.  This sketch collects Gyro and
+Example using the LIS3DH with basic settings.  This sketch collects
 Accelerometer data every second, then presents it on the serial monitor.
 
 Resources:

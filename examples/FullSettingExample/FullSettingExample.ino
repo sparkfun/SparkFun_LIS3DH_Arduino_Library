@@ -1,16 +1,17 @@
 /******************************************************************************
-MinimalistExample.ino
+FullSettingExample.ino
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DS3_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DS3_Arduino_Library
+Nov 16, 2016
+https://github.com/sparkfun/LIS3DH_Breakout
+https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
 Description:
 Most basic example of use.
 
-Example using the LSM6DS3 with basic settings.  This sketch collects Gyro and
-Accelerometer data every second, then presents it on the serial monitor.
+Example using the LSM6DS3 with settings applied within the begin() section.
+This sketch collects accelerometer data every second, then presents
+it on the serial monitor.
 
 Resources:
 Uses Wire.h for i2c operation
@@ -70,20 +71,6 @@ void loop()
   Serial.println(myIMU.readFloatAccelY(), 4);
   Serial.print(" Z = ");
   Serial.println(myIMU.readFloatAccelZ(), 4);
-
-  Serial.print("\nThermometer:\n");
-  Serial.print(" Degrees C = ");
-  Serial.println(myIMU.readTempC(), 4);
-  Serial.print(" Degrees F = ");
-  Serial.println(myIMU.readTempF(), 4);
-  
-//  float temp = 0;
-//  for(int i =0; i < 50; i++)
-//  {
-//	temp += myIMU.readRawAccelZ();
-//	delay(100);
-//  }
-//  Serial.println(temp / 50);
   
   delay(1000);
 }

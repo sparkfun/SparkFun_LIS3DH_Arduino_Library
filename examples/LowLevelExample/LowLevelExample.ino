@@ -2,20 +2,20 @@
 LowLevelExample.ino
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DS3_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DS3_Arduino_Library
+Nov 16, 2016
+https://github.com/sparkfun/LIS3DH_Breakout
+https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
 Description:
-Example using the LSM6DS3 with ONLY read and write methods.  It's up to you to
+Example using the LIS3DH with ONLY read and write methods.  It's up to you to
 read the datasheets and get the sensor to behave as you will.
 
 This sketch saves a significant amount of memory because the settings and complex
-math (such as floating point variables) don't exist.  The cost of saved memory is
+math (such as floating point variables) doesn't exist.  The cost of saved memory is
 that the values are in 'counts', or raw data from the register.  The user is
 responsible for converting these raw values into something meaningful.
 
-Use the register words from SparkFunLSM6DS3.h to manually configure the IC.
+Use the register words from SparkFunLIS3DH.h to manually configure the IC.
 
 Resources:
 Uses Wire.h for i2c operation
@@ -115,11 +115,6 @@ void setup() {
 	errorsAndWarnings += myIMU.writeRegister(LIS3DH_INT1_DURATION, dataToWrite);
   }
 
-  
-  //Set the ODR bit
-  //errorsAndWarnings += myIMU.readRegister(&dataToWrite, LSM6DS3_ACC_GYRO_CTRL4_C);
-  //dataToWrite &= ~((uint8_t)LSM6DS3_ACC_GYRO_BW_SCAL_ODR_ENABLED);
-
   //Get the ID:
   uint8_t readData = 0;
   Serial.print("\nReading LIS3DH_WHO_AM_I: 0x");
@@ -150,7 +145,6 @@ void loop()
   //Clear interrupts
   //errorsAndWarnings += myIMU.writeRegister(LIS3DH_INT1_SOURCE, 0x00);
 
-  
   //Dump regs:
   for( int i = LIS3DH_STATUS_REG_AUX; i <= LIS3DH_INT1_DURATION; i++)
   {

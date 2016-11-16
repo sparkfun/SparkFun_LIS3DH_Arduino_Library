@@ -3,7 +3,7 @@ SparkFunLIS3DH.cpp
 LIS3DH Arduino and Teensy Driver
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
+Nov 16, 2016
 https://github.com/sparkfun/LIS3DH_Breakout
 https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
@@ -77,6 +77,9 @@ status_t LIS3DHCore::beginCore(void)
 		break;
 
 	case SPI_MODE:
+		// initalize the chip select pins:
+		pinMode(chipSelectPin, OUTPUT);
+		digitalWrite(chipSelectPin, HIGH);
 		// start the SPI library:
 		SPI.begin();
 		// Maximum SPI frequency is 10MHz, could divide by 2 here:
@@ -97,10 +100,6 @@ status_t LIS3DHCore::beginCore(void)
 		SPI.setDataMode(SPI_MODE0);
 #else
 #endif
-		
-		// initalize the data ready and chip select pins:
-		pinMode(chipSelectPin, OUTPUT);
-		digitalWrite(chipSelectPin, HIGH);
 		break;
 	default:
 		break;
@@ -281,19 +280,7 @@ status_t LIS3DHCore::readRegisterInt16( int16_t* outputPointer, uint8_t offset )
 		*outputPointer = output;
 		return returnError;
 	}
-//	{
-//		uint8_t lowTemp = 0;
-//		uint8_t highTemp = 0;
-//		
-//		status_t returnError = IMU_SUCCESS;
-//		
-//		readRegister(&lowTemp, offset);
-//		offset++;
-//		readRegister(&highTemp, offset);
-//	
-//		*outputPointer = (int16_t)((uint16_t)highTemp << 8 | lowTemp);
-//		return returnError;
-//	}
+
 }
 
 //****************************************************************************//
@@ -364,15 +351,11 @@ LIS3DH::LIS3DH( uint8_t busType, uint8_t inputArg ) : LIS3DHCore( busType, input
 	settings.yAccelEnabled = 1;
 	settings.zAccelEnabled = 1;
 
-//	settings.accelFilter = 100;  //Hz.  Can be: 50, 100, 200, 400;
-//	settings.accelFifoEnabled = 1;  //Set to include accelerometer in the FIFO
-//	settings.accelFifoDecimation = 1;  //set 1 for on /1
-//
-//	//FIFO control data
-//	settings.fifoThreshold = 3000;  //Can be 0 to 4096 (16 bit bytes)
-//	settings.fifoSampleRate = 10;  //default 10Hz
-//	settings.fifoModeWord = 0;  //Default off
-
+	//FIFO control settings
+	settings.fifoEnabled = 0;
+	settings.fifoThreshold = 20;  //Can be 0 to 32
+	settings.fifoMode = 0;  //FIFO mode.
+  
 	allOnesCounter = 0;
 	nonSuccessCounter = 0;
 
@@ -445,7 +428,14 @@ void LIS3DH::applySettings( void )
 		case 400:
 		dataToWrite |= (0x07 << 4);
 		break;
+		case 1600:
+		dataToWrite |= (0x08 << 4);
+		break;
+		case 5000:
+		dataToWrite |= (0x09 << 4);
+		break;
 	}
+	
 	dataToWrite |= (settings.zAccelEnabled & 0x01) << 2;
 	dataToWrite |= (settings.yAccelEnabled & 0x01) << 1;
 	dataToWrite |= (settings.xAccelEnabled & 0x01);
@@ -494,17 +484,17 @@ int16_t LIS3DH::readRawAccelX( void )
 {
 	int16_t output;
 	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_X_L );
-//	if( errorLevel != IMU_SUCCESS )
-//	{
-//		if( errorLevel == IMU_ALL_ONES_WARNING )
-//		{
-//			allOnesCounter++;
-//		}
-//		else
-//		{
-//			nonSuccessCounter++;
-//		}
-//	}
+	if( errorLevel != IMU_SUCCESS )
+	{
+		if( errorLevel == IMU_ALL_ONES_WARNING )
+		{
+			allOnesCounter++;
+		}
+		else
+		{
+			nonSuccessCounter++;
+		}
+	}
 	return output;
 }
 float LIS3DH::readFloatAccelX( void )
@@ -517,17 +507,17 @@ int16_t LIS3DH::readRawAccelY( void )
 {
 	int16_t output;
 	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_Y_L );
-//	if( errorLevel != IMU_SUCCESS )
-//	{
-//		if( errorLevel == IMU_ALL_ONES_WARNING )
-//		{
-//			allOnesCounter++;
-//		}
-//		else
-//		{
-//			nonSuccessCounter++;
-//		}
-//	}
+	if( errorLevel != IMU_SUCCESS )
+	{
+		if( errorLevel == IMU_ALL_ONES_WARNING )
+		{
+			allOnesCounter++;
+		}
+		else
+		{
+			nonSuccessCounter++;
+		}
+	}
 	return output;
 }
 
@@ -541,17 +531,17 @@ int16_t LIS3DH::readRawAccelZ( void )
 {
 	int16_t output;
 	status_t errorLevel = readRegisterInt16( &output, LIS3DH_OUT_Z_L );
-//	if( errorLevel != IMU_SUCCESS )
-//	{
-//		if( errorLevel == IMU_ALL_ONES_WARNING )
-//		{
-//			allOnesCounter++;
-//		}
-//		else
-//		{
-//			nonSuccessCounter++;
-//		}
-//	}
+	if( errorLevel != IMU_SUCCESS )
+	{
+		if( errorLevel == IMU_ALL_ONES_WARNING )
+		{
+			allOnesCounter++;
+		}
+		else
+		{
+			nonSuccessCounter++;
+		}
+	}
 	return output;
 
 }
@@ -686,18 +676,7 @@ void LIS3DH::fifoStartRec( void )
 #endif
 	writeRegister(LIS3DH_FIFO_CTRL_REG, dataToWrite);
 }
-//int16_t LIS3DH::fifoRead( void ) {
-//	//Pull the last data from the fifo
-//	uint8_t tempReadByte = 0;
-//	uint16_t tempAccumulator = 0;
-//	readRegister(&tempReadByte, LIS3DH_ACC_GYRO_FIFO_DATA_OUT_L);
-//	tempAccumulator = tempReadByte;
-//	readRegister(&tempReadByte, LIS3DH_ACC_GYRO_FIFO_DATA_OUT_H);
-//	tempAccumulator |= ((uint16_t)tempReadByte << 8);
-//
-//	return tempAccumulator;
-//}
-//
+
 uint8_t LIS3DH::fifoGetStatus( void )
 {
 	//Return some data on the state of the fifo
@@ -709,8 +688,18 @@ uint8_t LIS3DH::fifoGetStatus( void )
 #endif
 	return tempReadByte;  
 }
-//void LIS3DH::fifoEnd( void ) {
-//	// turn off the fifo
-//	writeRegister(LIS3DH_ACC_GYRO_FIFO_STATUS1, 0x00);  //Disable
-//}
+
+void LIS3DH::fifoEnd( void )
+{
+	uint8_t dataToWrite = 0;  //Temporary variable
+
+	//Turn off...
+	readRegister( &dataToWrite, LIS3DH_FIFO_CTRL_REG ); //Start with existing data
+	dataToWrite &= 0x3F;//clear mode
+#ifdef VERBOSE_SERIAL
+	Serial.print("LIS3DH_FIFO_CTRL_REG: 0x");
+	Serial.println(dataToWrite, HEX);
+#endif
+	writeRegister(LIS3DH_FIFO_CTRL_REG, dataToWrite);	
+}
 

@@ -27,8 +27,8 @@ Example Briefs
 * IntUsage - shows configuration of interrupt bits
 * LowLevelExample - Demonstrates using only the core driver without math and settings overhead
 * MinimalistExample - The **easiest** configuration
-* **BROKEN** MultiI2C - Using two LIS3DHs over I2C
-* **BROKEN** MultiSPI - Using two LIS3DHs over SPI
+* MultiI2C - Using two LIS3DHs over I2C
+* MultiSPI - Using two LIS3DHs over SPI
 
 Documentation
 --------------

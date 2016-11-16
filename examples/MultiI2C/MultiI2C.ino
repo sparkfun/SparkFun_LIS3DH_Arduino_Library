@@ -2,12 +2,12 @@
 MultiI2C.ino
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
-https://github.com/sparkfun/LSM6DS3_Breakout
-https://github.com/sparkfun/SparkFun_LSM6DS3_Arduino_Library
+Nov 16, 2016
+https://github.com/sparkfun/LIS3DH_Breakout
+https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
 Description:
-Example using up to two LSM6DS3s on the same I2C channel.  If only one sensor
+Example using up to two LIS3DHs on the same I2C channel.  If only one sensor
 is attached, this sketch reports failure on that channel and runs with the
 single sensor instead.
 
@@ -25,8 +25,8 @@ Connect I2C SDA line to A4
 Connect I2C SCL line to A5
 Connect GND and ***3.3v*** power to the IMU.  The sensors are not 5v tolerant.
 
-(Multiple I2C devices use the same pins.  Up to two LSM6DS3s are allowed.  Use
-the solder jumper to select address 0x6A or 0x6B)
+(Multiple I2C devices use the same pins.  Up to two LIS3DHs are allowed.  Use
+the solder jumper to select address 0x19 (default) or 0x18)
 
 This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
@@ -36,14 +36,13 @@ or concerns with licensing, please contact techsupport@sparkfun.com.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
 
-#include "SparkFunLSM6DS3.h"
+#include "SparkFunLIS3DH.h"
 #include "Wire.h"
 #include "SPI.h"
 
 //Create two instances of the driver class
-LSM6DS3 SensorOne( I2C_MODE, 0x6A );
-LSM6DS3 SensorTwo( I2C_MODE, 0x6B );
-
+LIS3DH SensorOne( I2C_MODE, 0x19 );
+LIS3DH SensorTwo( I2C_MODE, 0x18 );
 
 void setup() {
   // put your setup code here, to run once:
@@ -54,19 +53,19 @@ void setup() {
   //Call .begin() to configure the IMUs
   if( SensorOne.begin() != 0 )
   {
-	  Serial.println("Problem starting the sensor at 0x6A.");
+	  Serial.println("Problem starting the sensor at 0x19.");
   }
   else
   {
-	  Serial.println("Sensor at 0x6A started.");
+	  Serial.println("Sensor at 0x19 started.");
   }
   if( SensorTwo.begin() != 0 )
   {
-	  Serial.println("Problem starting the sensor at 0x6B.");
+	  Serial.println("Problem starting the sensor at 0x18.");
   }
   else
   {
-	  Serial.println("Sensor at 0x6B started.");
+	  Serial.println("Sensor at 0x18 started.");
   }
   
 }
@@ -88,30 +87,6 @@ void loop()
   Serial.println(SensorTwo.readFloatAccelY(), 4);
   Serial.print(" Z2 = ");
   Serial.println(SensorTwo.readFloatAccelZ(), 4);
-  
-  Serial.print("\nGyroscope:\n");
-  Serial.print(" X1 = ");
-  Serial.println(SensorOne.readFloatGyroX(), 4);
-  Serial.print(" Y1 = ");
-  Serial.println(SensorOne.readFloatGyroY(), 4);
-  Serial.print(" Z1 = ");
-  Serial.println(SensorOne.readFloatGyroZ(), 4);
-  Serial.print(" X2 = ");
-  Serial.println(SensorTwo.readFloatGyroX(), 4);
-  Serial.print(" Y2 = ");
-  Serial.println(SensorTwo.readFloatGyroY(), 4);
-  Serial.print(" Z2 = ");
-  Serial.println(SensorTwo.readFloatGyroZ(), 4);
-
-  Serial.print("\nThermometer:\n");
-  Serial.print(" Degrees C1 = ");
-  Serial.println(SensorOne.readTempC(), 4);
-  Serial.print(" Degrees C2 = ");
-  Serial.println(SensorTwo.readTempC(), 4);
-  Serial.print(" Degrees F1 = ");
-  Serial.println(SensorOne.readTempF(), 4);
-  Serial.print(" Degrees F2 = ");
-  Serial.println(SensorTwo.readTempF(), 4);
   
   Serial.print("\nSensorOne Bus Errors Reported:\n");
   Serial.print(" All '1's = ");

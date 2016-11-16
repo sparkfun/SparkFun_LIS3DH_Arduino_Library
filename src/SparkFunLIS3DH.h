@@ -3,7 +3,7 @@ SparkFunLIS3DH.h
 LIS3DH Arduino and Teensy Driver
 
 Marshall Taylor @ SparkFun Electronics
-May 20, 2015
+Nov 16, 2016
 https://github.com/sparkfun/LIS3DH_Breakout
 https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library
 
@@ -145,20 +145,13 @@ public:
 	uint16_t read10bitADC2( void );
 	uint16_t read10bitADC3( void );
 	
-	//Temperature
-	int16_t readRawTemp( void );
-	float readTempC( void );
-	float readTempF( void );
-
 	//FIFO stuff
 	void fifoBegin( void );
 	void fifoClear( void );
-	//int16_t fifoRead( void );
 	uint8_t fifoGetStatus( void );
 	void fifoStartRec();
-	//void fifoEnd( void );
+	void fifoEnd( void );
 	
-	//float calcGyro( int16_t );
 	float calcAccel( int16_t );
 	
 private:
@@ -194,7 +187,7 @@ private:
 #define LIS3DH_FIFO_CTRL_REG          0x2E
 #define LIS3DH_FIFO_SRC_REG           0x2F
 #define LIS3DH_INT1_CFG               0x30
-#define LIS3DH_INT1_SOURCE            0x31
+#define LIS3DH_INT1_SRC               0x31
 #define LIS3DH_INT1_THS               0x32
 #define LIS3DH_INT1_DURATION          0x33
 
