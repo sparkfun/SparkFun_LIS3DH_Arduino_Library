@@ -1,9 +1,9 @@
 SparkFun LIS3DH Arduino Library
 ========================================
 
-**BROKEN** ![LIS3DH Breakout](https://www.sparkfun.com/)
+ ![LIS3DH Breakout](https://cdn.sparkfun.com//assets/parts/1/1/6/8/0/13963-02.jpg)
 
-**BROKEN** [*LIS3DH Breakout (SEN-XXXXX)*](https://www.sparkfun.com/)
+ [*LIS3DH Breakout (SEN-13963)*](https://www.sparkfun.com/products/13963)
 
 This is an arduino IDE library to control the LIS3DH.  It can be configured to use I2C or SPI with 2 instances per I2C channel or any number of SPI instances.  The top-level driver, class LIS3DH, contains an inner driver LIS3DHCore, a settings struct, and float-based math functions for conversion from raw to meaningful numbers.
 
@@ -34,18 +34,18 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **BROKEN** **[Product Repository](https://www.sparkfun.com/)** - Main repository (including hardware files) for the LIS3DH Breakout.
-* **BROKEN** **[Hookup Guide](https://www.sparkfun.com/)** - Basic hookup guide for the LIS3DH Breakout.
+* **[Product Repository](https://github.com/sparkfun/LIS3DH_Breakout)** - Main repository (including hardware files) for the LIS3DH Breakout.
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/lis3dh-hookup-guide)** - Basic hookup guide for the LIS3DH Breakout.
 
 Products that use this Library 
 ---------------------------------
 
-* [SEN-XXXXX](https://www.sparkfun.com/)- LIS3DH Breakout board
+* [SEN-13963](https://www.sparkfun.com/)- LIS3DH Breakout board
 
 Version History
 ---------------
 
-* **BROKEN**[V 1.0.0](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino 1.6-compatible library.
+* [V 1.0.0](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino 1.6-compatible library.
 
 License Information
 -------------------
