@@ -26,9 +26,8 @@ Arduino IDE 1.6.4
 Teensy loader 1.23
 
 Hardware connections:
-Connect I2C SDA line to A4
-Connect I2C SCL line to A5
-Connect GND and 3.3v power to the IMU
+Connect to SPI through a logic level converter (or to a 3.3v processor).
+Pin 10 is used as the chip select line.
 
 This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 
@@ -42,7 +41,8 @@ Distributed as-is; no warranty is given.
 #include "Wire.h"
 #include "SPI.h"
 
-LIS3DH myIMU; //Default constructor is I2C, addr 0x19.
+LIS3DH myIMU(SPI_MODE, 10); //Constructing with SPI interface information
+//LIS3DH myIMU(I2C_MODE, 0x19); //Alternate constructor for I2C
 
 uint32_t sampleNumber = 0; //Used to make CSV output row numbers
 

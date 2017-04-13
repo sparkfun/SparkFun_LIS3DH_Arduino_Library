@@ -77,6 +77,35 @@ status_t LIS3DHCore::beginCore(void)
 		break;
 
 	case SPI_MODE:
+#if defined(ARDUINO_ARCH_ESP32)
+		// initalize the chip select pins:
+		pinMode(chipSelectPin, OUTPUT);
+		digitalWrite(chipSelectPin, HIGH);
+		SPI.begin();
+		SPI.setFrequency(1000000);
+		// Data is read and written MSb first.
+		SPI.setBitOrder(SPI_MSBFIRST);
+		// Like the standard arduino/teensy comment below, mode0 seems wrong according to standards
+		// but conforms to the timing diagrams when used for the ESP32
+		SPI.setDataMode(SPI_MODE0);
+
+#elif defined(__MK20DX256__)
+		// initalize the chip select pins:
+		pinMode(chipSelectPin, OUTPUT);
+		digitalWrite(chipSelectPin, HIGH);
+		// start the SPI library:
+		SPI.begin();
+		// Maximum SPI frequency is 10MHz, could divide by 2 here:
+		SPI.setClockDivider(SPI_CLOCK_DIV4);
+		// Data is read and written MSb first.
+		SPI.setBitOrder(MSBFIRST);
+		// Data is captured on rising edge of clock (CPHA = 0)
+		// Base value of the clock is HIGH (CPOL = 1)
+
+		// MODE0 for Teensy 3.1 operation
+		SPI.setDataMode(SPI_MODE0);
+#else
+// probably __AVR__
 		// initalize the chip select pins:
 		pinMode(chipSelectPin, OUTPUT);
 		digitalWrite(chipSelectPin, HIGH);
@@ -90,15 +119,8 @@ status_t LIS3DHCore::beginCore(void)
 		// Base value of the clock is HIGH (CPOL = 1)
 
 		// MODE3 for 328p operation
-#ifdef __AVR__
 		SPI.setDataMode(SPI_MODE3);
-#else
-#endif
 
-		// MODE0 for Teensy 3.1 operation
-#ifdef __MK20DX256__
-		SPI.setDataMode(SPI_MODE0);
-#else
 #endif
 		break;
 	default:

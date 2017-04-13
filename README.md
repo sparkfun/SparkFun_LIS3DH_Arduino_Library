@@ -7,7 +7,11 @@ SparkFun LIS3DH Arduino Library
 
 This is an arduino IDE library to control the LIS3DH.  It can be configured to use I2C or SPI with 2 instances per I2C channel or any number of SPI instances.  The top-level driver, class LIS3DH, contains an inner driver LIS3DHCore, a settings struct, and float-based math functions for conversion from raw to meaningful numbers.
 
-This has been tested with Arduino Uno.  TODO:(*and Teensy 3.1 architectures*).
+This has been tested with:
+
+* SparkFun RedBoard
+* SparkFun ESP32 Thing
+* Teensy 3.2
 
 Repository Contents
 -------------------
@@ -46,6 +50,7 @@ Version History
 ---------------
 
 * [V 1.0.0](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino 1.6-compatible library.
+* [V 1.0.1](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.1) -- Added Teensy and ESP32 support.
 
 License Information
 -------------------
