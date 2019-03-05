@@ -12,4 +12,3 @@ Example Briefs
 * MinimalistExample - The **easiest** configuration
 * MultiI2C - Using two LSM6DS3s over I2C
 * MultiSPI - Using two LSM6DS3s over SPI
-* Pedometer - Embedded function demonstrating step-counting feature
