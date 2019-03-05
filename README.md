@@ -50,7 +50,7 @@ Version History
 ---------------
 
 * [V 1.0.0](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.0) -- Initial commit of Arduino 1.6-compatible library.
-* [V 1.0.1](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.1) -- Added Teensy and ESP32 support.
+* [V 1.0.2](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/releases/tag/V_1.0.2) -- Added Teensy and ESP32 support.
 
 License Information
 -------------------
