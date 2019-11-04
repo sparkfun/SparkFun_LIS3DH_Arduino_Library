@@ -138,12 +138,12 @@ void loop()
   myIMU.readRegister(&readData, LIS3DH_STATUS_REG_AUX);
   Serial.println(readData, HEX);
 
-  Serial.print("\nReading LIS3DH_INT1_SOURCE: 0x");
-  myIMU.readRegister(&readData, LIS3DH_INT1_SOURCE);
+  Serial.print("\nReading LIS3DH_INT1_SRC: 0x");
+  myIMU.readRegister(&readData, LIS3DH_INT1_SRC);
   Serial.println(readData, HEX);
 
   //Clear interrupts
-  //errorsAndWarnings += myIMU.writeRegister(LIS3DH_INT1_SOURCE, 0x00);
+  //errorsAndWarnings += myIMU.writeRegister(LIS3DH_INT1_SRC, 0x00);
 
   //Dump regs:
   for( int i = LIS3DH_STATUS_REG_AUX; i <= LIS3DH_INT1_DURATION; i++)
