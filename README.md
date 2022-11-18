@@ -1,5 +1,6 @@
 SparkFun LIS3DH Arduino Library
 ========================================
+[![Compile Examples](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/workflows/Compile%20Examples/badge.svg)](https://github.com/sparkfun/SparkFun_LIS3DH_Arduino_Library/actions?workflow=Compile+Examples)
 
  ![LIS3DH Breakout](https://cdn.sparkfun.com//assets/parts/1/1/6/8/0/13963-02.jpg)
 
