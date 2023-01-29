@@ -251,12 +251,12 @@ struct LIS3DHEnums
 	/// @brief CTRL_REG3 controls where interupt 1 is send to.
 	enum CTRL_REG3
 	{
-		I1_CLICK = 0b10000000,
-		I1_IA1 = 0b01000000,
-		I1_IA2 = 0b00100000,
-		I1_ZYXDA = 0b00010000,
-		I1_321DA = 0b00001000,
-		I1_WTM = 0b00000100,
+		I1_CLICK   = 0b10000000,
+		I1_IA1     = 0b01000000,
+		I1_IA2     = 0b00100000,
+		I1_ZYXDA   = 0b00010000,
+		I1_321DA   = 0b00001000,
+		I1_WTM     = 0b00000100,
 		I1_OVERRUN = 0b00000010,
 	};
 
