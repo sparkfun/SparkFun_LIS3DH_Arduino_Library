@@ -238,7 +238,7 @@ status_t LIS3DHCore::readRegisterRegion(uint8_t *outputPointer , uint8_t offset,
 //****************************************************************************//
 status_t LIS3DHCore::readRegister(uint8_t* outputPointer, uint8_t offset) {
 	//Return value
-	uint8_t result;
+	uint8_t result=0;
 	uint8_t numBytes = 1;
 	status_t returnError = IMU_SUCCESS;
 
@@ -296,7 +296,7 @@ status_t LIS3DHCore::readRegisterInt16( int16_t* outputPointer, uint8_t offset )
 {
 	{
 		//offset |= 0x80; //turn auto-increment bit on
-		uint8_t myBuffer[2];
+		uint8_t myBuffer[2] = {0,0};
 		status_t returnError = readRegisterRegion(myBuffer, offset, 2);  //Does memory transfer
 		int16_t output = (int16_t)myBuffer[0] | int16_t(myBuffer[1] << 8);
 		*outputPointer = output;
