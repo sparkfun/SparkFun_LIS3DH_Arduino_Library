@@ -390,12 +390,14 @@ LIS3DH::LIS3DH( uint8_t busType, uint8_t inputArg ) : LIS3DHCore( busType, input
 //  This starts the lower level begin, then applies settings
 //
 //****************************************************************************//
-status_t LIS3DH::begin( void )
+status_t LIS3DH::begin( bool applySettingsAtStart )
 {
 	//Begin the inherited core.  This gets the physical wires connected
 	status_t returnError = beginCore();
 
-	applySettings();
+	if (applySettingsAtStart) {
+		applySettings();
+	}
 	
 	return returnError;
 }

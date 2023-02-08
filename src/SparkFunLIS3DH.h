@@ -57,7 +57,7 @@ public:
 	LIS3DHCore(uint8_t, uint8_t);
 	~LIS3DHCore() = default;
 
-	status_t beginCore(void);
+	status_t beginCore( void );
 
 	// The following utilities read and write to the IMU
 
@@ -126,7 +126,7 @@ public:
 	//~LIS3DH() = default;
 
 	// Call to apply SensorSettings
-	status_t begin(void);
+	status_t begin( bool );
 	void applySettings(void);
 
 	// Returns the raw bits from the sensor cast as 16-bit signed integers
