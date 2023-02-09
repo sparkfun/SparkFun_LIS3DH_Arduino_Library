@@ -210,6 +210,7 @@ private:
 /// @brief These are all helper enums so we can use the wording in our code, and do binary operations to get to the right value.
 struct LIS3DHEnums
 {
+
 	enum CTRL_REG0
 	{
 		PullUpConnected    = 0b00010000,
@@ -288,11 +289,11 @@ struct LIS3DHEnums
 	/// @brief CTRL_REG6 controls where interupt 2 is send to.
 	enum CTRL_REG6
 	{
-		I2_CLICK = 0b10000000,
-		I2_IA1 = 0b01000000,
-		I2_IA2 = 0b00100000,
-		I2_BOOT = 0b00010000,
-		I2_ACT = 0b00001000,
+		I2_CLICK     = 0b10000000,
+		I2_IA1       = 0b01000000,
+		I2_IA2       = 0b00100000,
+		I2_BOOT      = 0b00010000,
+		I2_ACT       = 0b00001000,
 		INT_POLARITY = 0b00000010,
 	};
 
@@ -342,5 +343,6 @@ struct LIS3DHEnums
 		XL   = 0b00000001,
 	};
 };
+
 
 #endif // End of __LIS3DH_IMU_H__ definition check
