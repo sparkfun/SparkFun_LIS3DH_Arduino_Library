@@ -10,7 +10,7 @@ Description:
 Interrupt support for the LIS3DH is extremely flexible, so configuration must be left
 to the user.  This sketch demonstrates how to make a interrupt configuration function.
 
-Use configIntterupts() as a template, then comment/uncomment desired options.
+Use configInterrupts() as a template, then comment/uncomment desired options.
 See ST docs for information
   Doc ID 18198 (AN3308): LIS3DHpplication information
   Doc ID 17530: LIS3DH datasheet
@@ -62,7 +62,7 @@ void setup() {
   //Call .begin() to configure the IMU
   myIMU.begin();
   
-  configIntterupts();
+  configInterrupts();
 
 }
 
@@ -108,7 +108,7 @@ void loop()
   
 }
 
-void configIntterupts()
+void configInterrupts()
 {
   uint8_t dataToWrite = 0;
 
